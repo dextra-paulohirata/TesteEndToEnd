@@ -1,8 +1,8 @@
 package org.example.TesteEndToEnd.controller;
 
 import org.example.TesteEndToEnd.dto.UsuarioDTO;
-import org.example.TesteEndToEnd.model.Usuario;
-import org.example.TesteEndToEnd.repository.UsuarioRepository;
+import org.example.TesteEndToEnd.exception.CepNaoInformadoException;
+import org.example.TesteEndToEnd.exception.NomeNaoInformadoException;
 import org.example.TesteEndToEnd.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,13 +35,14 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public UsuarioDTO create(@RequestBody UsuarioDTO usuarioDTO) {
+    // TODO: criar uma exception padrao para retornar no Rest
+    public UsuarioDTO create(@RequestBody UsuarioDTO usuarioDTO) throws NomeNaoInformadoException, CepNaoInformadoException {
         return service.create(usuarioDTO);
     }
 
     @PutMapping(value="/{id}")
     public ResponseEntity<UsuarioDTO> update(@PathVariable("id") long id,
-                                          @RequestBody UsuarioDTO usuarioDTO){
+                                          @RequestBody UsuarioDTO usuarioDTO) throws NomeNaoInformadoException, CepNaoInformadoException {
         UsuarioDTO usuarioAtualizado = service.update(id, usuarioDTO);
         if (usuarioAtualizado == null) {
             return ResponseEntity.notFound().build();

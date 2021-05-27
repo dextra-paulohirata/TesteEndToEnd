@@ -1,6 +1,8 @@
 package org.example.TesteEndToEnd;
 
 import org.example.TesteEndToEnd.dto.UsuarioDTO;
+import org.example.TesteEndToEnd.exception.CepNaoInformadoException;
+import org.example.TesteEndToEnd.exception.NomeNaoInformadoException;
 import org.example.TesteEndToEnd.model.Usuario;
 import org.example.TesteEndToEnd.repository.UsuarioRepository;
 import org.example.TesteEndToEnd.service.UsuarioService;
@@ -11,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -61,20 +62,66 @@ public class UsuarioServiceTest {
         when(repository.findById(1L)).thenReturn(java.util.Optional.ofNullable(usuario));
         when(repository.save(usuario)).thenReturn(usuario);
 
-        UsuarioDTO usuarioDTO = service.update(1L, usuario.toDTO());
+        Assertions.assertDoesNotThrow(() -> {
+            UsuarioDTO usuarioDTO = service.update(1L, usuario.toDTO());
 
-        Assertions.assertEquals("Phoenix", usuarioDTO.getNome());
-        Assertions.assertEquals("01234-010", usuarioDTO.getCep());
+            Assertions.assertEquals("Phoenix", usuarioDTO.getNome());
+            Assertions.assertEquals("01234-010", usuarioDTO.getCep());
+        });
+    }
+
+    @Test
+    public void whenUpdateUsuario_ThenThrowNomeNaoInformadoException() {
+        Assertions.assertThrows(NomeNaoInformadoException.class, () -> {
+            UsuarioDTO result = service.update(1L, new UsuarioDTO(1L, null, "01234-010", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+        });
+
+        Assertions.assertThrows(NomeNaoInformadoException.class, () -> {
+            UsuarioDTO result = service.update(1L, new UsuarioDTO(1L, "", "01234-010", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+        });
+    }
+
+    @Test
+    public void whenUpdateUsuario_ThenThrowCepNaoInformadoException() {
+        Assertions.assertThrows(CepNaoInformadoException.class, () -> {
+            UsuarioDTO result = service.update(1L, new UsuarioDTO(1L, "Paulo", "", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+        });
+
+        Assertions.assertThrows(CepNaoInformadoException.class, () -> {
+            UsuarioDTO result = service.update(1L, new UsuarioDTO(1L, "Paulo", null, "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+        });
     }
 
     @Test
     public void whenCreateUsuario_ThenUsuarioShouldBeCreated() {
         when(repository.save(usuario)).thenReturn(usuario);
+        Assertions.assertDoesNotThrow(() -> {
+            UsuarioDTO result = service.create(new UsuarioDTO(1L, "Phoenix", "01234-010", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+            Assertions.assertEquals(1L, result.getId());
+            Assertions.assertEquals("Phoenix", result.getNome());
+        });
+    }
 
-        UsuarioDTO result = service.create(new UsuarioDTO(1L, "Phoenix", "01234-010", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+    @Test
+    public void whenCreateUsuario_ThenThrowNomeNaoInformadoException() {
+        Assertions.assertThrows(NomeNaoInformadoException.class, () -> {
+            UsuarioDTO result = service.create(new UsuarioDTO(1L, null, "01234-010", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+        });
 
-        Assertions.assertEquals(1L, result.getId());
-        Assertions.assertEquals("Phoenix", result.getNome());
+        Assertions.assertThrows(NomeNaoInformadoException.class, () -> {
+            UsuarioDTO result = service.create(new UsuarioDTO(1L, "", "01234-010", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+        });
+    }
+
+    @Test
+    public void whenCreateUsuario_ThenThrowCepNaoInformadoException() {
+        Assertions.assertThrows(CepNaoInformadoException.class, () -> {
+            UsuarioDTO result = service.create(new UsuarioDTO(1L, "Snider", "", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+        });
+
+        Assertions.assertThrows(CepNaoInformadoException.class, () -> {
+            UsuarioDTO result = service.create(new UsuarioDTO(1L, "Snider", null, "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+        });
     }
 
     @Test

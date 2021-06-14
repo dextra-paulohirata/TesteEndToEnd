@@ -11,8 +11,8 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
 
-@SpringBootTest(classes = { MySqlConfig.class })
-@ActiveProfiles("test")
+@SpringBootTest // (classes = { MySqlConfig.class })
+//@ActiveProfiles("test")
 public class TesteEndToEndMySqlTests {
     @Autowired
     private UsuarioRepository repository;
@@ -25,5 +25,7 @@ public class TesteEndToEndMySqlTests {
         Optional<Usuario> optional = repository.findById(savedEntity.getId());
         Assertions.assertEquals(true, optional.isPresent());
     }
+
+
 
 }

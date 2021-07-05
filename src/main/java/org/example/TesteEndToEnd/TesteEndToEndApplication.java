@@ -1,13 +1,7 @@
 package org.example.TesteEndToEnd;
 
-import org.example.TesteEndToEnd.model.Usuario;
-import org.example.TesteEndToEnd.repository.UsuarioRepository;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-
-import java.util.stream.LongStream;
 
 @SpringBootApplication
 public class TesteEndToEndApplication {

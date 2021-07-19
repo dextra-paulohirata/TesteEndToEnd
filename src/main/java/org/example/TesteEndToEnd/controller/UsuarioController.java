@@ -1,6 +1,7 @@
 package org.example.TesteEndToEnd.controller;
 
 import org.example.TesteEndToEnd.dto.UsuarioDTO;
+import org.example.TesteEndToEnd.exception.CepInvalidoException;
 import org.example.TesteEndToEnd.exception.CepNaoInformadoException;
 import org.example.TesteEndToEnd.exception.NomeNaoInformadoException;
 import org.example.TesteEndToEnd.service.UsuarioService;
@@ -36,13 +37,13 @@ public class UsuarioController {
 
     @PostMapping
     // TODO: criar uma exception padrao para retornar no Rest
-    public UsuarioDTO create(@RequestBody UsuarioDTO usuarioDTO) throws NomeNaoInformadoException, CepNaoInformadoException {
+    public UsuarioDTO create(@RequestBody UsuarioDTO usuarioDTO) throws NomeNaoInformadoException, CepNaoInformadoException, CepInvalidoException {
         return service.create(usuarioDTO);
     }
 
     @PutMapping(value="/{id}")
     public ResponseEntity<UsuarioDTO> update(@PathVariable("id") long id,
-                                          @RequestBody UsuarioDTO usuarioDTO) throws NomeNaoInformadoException, CepNaoInformadoException {
+                                          @RequestBody UsuarioDTO usuarioDTO) throws NomeNaoInformadoException, CepNaoInformadoException, CepInvalidoException {
         UsuarioDTO usuarioAtualizado = service.update(id, usuarioDTO);
         if (usuarioAtualizado == null) {
             return ResponseEntity.notFound().build();

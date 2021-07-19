@@ -1,6 +1,8 @@
 package org.example.TesteEndToEnd;
 
+import org.example.TesteEndToEnd.dto.AddressDTO;
 import org.example.TesteEndToEnd.dto.UsuarioDTO;
+import org.example.TesteEndToEnd.exception.CepInvalidoException;
 import org.example.TesteEndToEnd.exception.CepNaoInformadoException;
 import org.example.TesteEndToEnd.exception.NomeNaoInformadoException;
 import org.example.TesteEndToEnd.model.Usuario;
@@ -15,6 +17,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +38,9 @@ public class UsuarioServiceTest {
 
     @Mock
     UsuarioRepository repository;
+
+    @Mock
+    RestTemplate restTemplate;
 
     @BeforeAll
     private static void init() {
@@ -96,11 +104,17 @@ public class UsuarioServiceTest {
 
     @Test
     public void whenCreateUsuario_ThenUsuarioShouldBeCreated() {
+        usuario = new Usuario(1L, "Phoenix", "01234-010", "Praça Charles Miller", "255", "ap 12", "Sao Paulo", "SP");
+        AddressDTO addressDTO = new AddressDTO("01234-010", "Praça Charles Miller", "", "Pacaembu", "Sao Paulo", "SP", "3550308", "1004", "11", "7107");
         when(repository.save(usuario)).thenReturn(usuario);
+
+        when(restTemplate.getForEntity("https://viacep.com.br/ws/01234010/json/", AddressDTO.class)).thenReturn(new ResponseEntity(addressDTO, HttpStatus.OK));
+
         Assertions.assertDoesNotThrow(() -> {
             UsuarioDTO result = service.create(new UsuarioDTO(1L, "Phoenix", "01234-010", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
             Assertions.assertEquals(1L, result.getId());
             Assertions.assertEquals("Phoenix", result.getNome());
+            Assertions.assertEquals("Praça Charles Miller", result.getLogradouro());
         });
     }
 
@@ -134,5 +148,15 @@ public class UsuarioServiceTest {
 
         Mockito.verify(repository, times(1)).findById(1L);
         Mockito.verify(repository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    public void whenCreateUsuario_ThenThrowCepInvalidoException() {
+        AddressDTO addressDTO = new AddressDTO();
+        when(restTemplate.getForEntity("https://viacep.com.br/ws/00000000/json/", AddressDTO.class)).thenReturn(new ResponseEntity(addressDTO, HttpStatus.OK));
+
+        Assertions.assertThrows(CepInvalidoException.class, () -> {
+            UsuarioDTO result = service.create(new UsuarioDTO(1L, "Snider", "00000000", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+        });
     }
 }

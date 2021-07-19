@@ -3,16 +3,18 @@ package org.example.TesteEndToEnd;
 import com.google.gson.Gson;
 import io.restassured.RestAssured;
 import org.example.TesteEndToEnd.dto.UsuarioDTO;
+import org.example.TesteEndToEnd.exception.CepInvalidoException;
 import org.example.TesteEndToEnd.exception.CepNaoInformadoException;
 import org.example.TesteEndToEnd.exception.NomeNaoInformadoException;
 import org.example.TesteEndToEnd.model.Usuario;
 import org.example.TesteEndToEnd.repository.UsuarioRepository;
 import org.example.TesteEndToEnd.service.UsuarioService;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
@@ -27,7 +29,8 @@ import static org.hamcrest.Matchers.hasSize;
 
 @Sql(scripts = "classpath:clean.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 @Profile("test")
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@ContextConfiguration(classes = TesteEndToEndApplication.class)
 class TesteEndToEndApplicationTests {
 
 	@Autowired
@@ -36,10 +39,12 @@ class TesteEndToEndApplicationTests {
 	@Autowired
 	private UsuarioService service;
 
-	@BeforeAll
-	public static void setup() {
-		RestAssured.baseURI = "http://localhost";
-		RestAssured.port = 7090;
+	@LocalServerPort
+	private int port;
+
+	@BeforeEach
+	public void initialize() {
+		RestAssured.port = port;
 	}
 
 	@Test
@@ -56,9 +61,7 @@ class TesteEndToEndApplicationTests {
 		try {
 			service.create(new UsuarioDTO(1L, "Phoenix", "01234-010", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
 			service.create(new UsuarioDTO(2L, "Nemesis", "43210-010", "Rua Montes Claros", "53", "ap 12", "Diamantina", "MG"));
-		} catch (NomeNaoInformadoException e) {
-			e.printStackTrace();
-		} catch (CepNaoInformadoException e) {
+		} catch (NomeNaoInformadoException | CepNaoInformadoException | CepInvalidoException e) {
 			e.printStackTrace();
 		}
 		List<UsuarioDTO> result = service.findAll();
@@ -74,7 +77,7 @@ class TesteEndToEndApplicationTests {
 		Gson gson = new Gson();
 		UsuarioDTO dto = gson.fromJson(usuarioCreated, UsuarioDTO.class);
 
-		when().delete("/usuarios/{id}", dto.getId()).then().statusCode(200);
+//		when().delete("/usuarios/{id}", dto.getId()).then().statusCode(200);
 
 		Assertions.assertEquals("Typhon", dto.getNome());
 		Assertions.assertEquals("Rua Vazia", dto.getLogradouro());
@@ -94,8 +97,7 @@ class TesteEndToEndApplicationTests {
 				statusCode(200).
 				body("nome", equalTo(dto.getNome()));
 
-		when().delete("/usuarios/{id}", dto.getId()).
-				then().statusCode(200);
+//		when().delete("/usuarios/{id}", dto.getId()).then().statusCode(200);
 	}
 
 	@Test
@@ -111,7 +113,6 @@ class TesteEndToEndApplicationTests {
 				then().
 				statusCode(200).body("", hasSize(1));
 
-		when().delete("/usuarios/{id}", dto.getId()).
-				then().statusCode(200);
+//		when().delete("/usuarios/{id}", dto.getId()).then().statusCode(200);
 	}
 }

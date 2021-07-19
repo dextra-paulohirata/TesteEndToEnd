@@ -1,11 +1,16 @@
 package org.example.TesteEndToEnd.service;
 
+import org.example.TesteEndToEnd.dto.AddressDTO;
 import org.example.TesteEndToEnd.dto.UsuarioDTO;
+import org.example.TesteEndToEnd.exception.CepInvalidoException;
 import org.example.TesteEndToEnd.exception.CepNaoInformadoException;
 import org.example.TesteEndToEnd.exception.NomeNaoInformadoException;
 import org.example.TesteEndToEnd.model.Usuario;
 import org.example.TesteEndToEnd.repository.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +20,11 @@ import java.util.Optional;
 public class UsuarioService {
     private UsuarioRepository repository;
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
+    private RestTemplate restTemplate;
+
+    public UsuarioService(UsuarioRepository usuarioRepository, RestTemplate restTemplate) {
         this.repository = usuarioRepository;
+        this.restTemplate = restTemplate;
     }
 
     public List findAll(){
@@ -33,16 +41,23 @@ public class UsuarioService {
         return optionalUsuario.isPresent() ? optionalUsuario.get().toDTO() : null;
     }
 
-    public UsuarioDTO create(UsuarioDTO dto) throws NomeNaoInformadoException, CepNaoInformadoException {
+    public UsuarioDTO create(UsuarioDTO dto) throws NomeNaoInformadoException, CepNaoInformadoException, CepInvalidoException {
         validateDTO(dto);
+        getAddressFromViaCep(dto);
         Usuario usuarioCreated = repository.save(dto.toModel());
         return usuarioCreated.toDTO();
     }
 
-    public UsuarioDTO update(long id, UsuarioDTO dto) throws NomeNaoInformadoException, CepNaoInformadoException {
+    public UsuarioDTO update(long id, UsuarioDTO dto) throws NomeNaoInformadoException, CepNaoInformadoException, CepInvalidoException {
         validateDTO(dto);
 
         Optional<Usuario> optionalUsuario = repository.findById(id);
+        if (optionalUsuario.isPresent()) {
+            if (!optionalUsuario.get().getCep().equalsIgnoreCase(dto.getCep())) {
+                getAddressFromViaCep(dto);
+            }
+        }
+
         Usuario usuarioAtualizado = optionalUsuario
                                         .map(usuario -> {
                                             usuario.setNome(dto.getNome());
@@ -75,5 +90,22 @@ public class UsuarioService {
         } else {
             return false;
         }
+    }
+
+    private void getAddressFromViaCep(UsuarioDTO dto) throws CepInvalidoException {
+        AddressDTO addressDTO = searchZIP(dto.getCep());
+        dto.setCidade(addressDTO.getLocalidade());
+        dto.setLogradouro(addressDTO.getLogradouro());
+        dto.setEstado(addressDTO.getUf());
+    }
+
+    private AddressDTO searchZIP(String cep) throws CepInvalidoException {
+        String url = "https://viacep.com.br/ws/" + cep.replace("-", "").replace(" ", "");
+        url += "/json/";
+        ResponseEntity<AddressDTO> addressDTO = restTemplate.getForEntity(url, AddressDTO.class);
+        if (addressDTO.getBody() == null || addressDTO.getBody().getCep() == null) {
+            throw new CepInvalidoException();
+        }
+        return addressDTO.getBody();
     }
 }

@@ -24,6 +24,7 @@ import java.util.Optional;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
@@ -59,8 +60,8 @@ class TesteEndToEndApplicationTests {
 	@Test
 	public void givenUsuariosCreated_whenFindAllUsuarios_ThenAllUsuariosCreatedShouldBeFound(){
 		try {
-			service.create(new UsuarioDTO(1L, "Phoenix", "01234-010", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
-			service.create(new UsuarioDTO(2L, "Nemesis", "43210-010", "Rua Montes Claros", "53", "ap 12", "Diamantina", "MG"));
+			service.create(new UsuarioDTO(1L, "", "01234-010", "Praça Charles Miller", "255", "ap 12", "Sao Paulo", "SP"));
+			service.create(new UsuarioDTO(2L, "Nemesis", "02234-010", "Rua Capitão Alcook", "53", "ap 12", "São Paulo", "SP"));
 		} catch (NomeNaoInformadoException | CepNaoInformadoException | CepInvalidoException e) {
 			e.printStackTrace();
 		}
@@ -71,16 +72,14 @@ class TesteEndToEndApplicationTests {
 	@Test
 	public void givenUsuarioThenSavesUsuarioAndDelete() {
 		String usuarioCreated = given().contentType("application/json")
-				.body(new UsuarioDTO(2L, "Typhon", "01500-060", "Rua Vazia", "144", "", "Sao Paulo", "SP"))
+				.body(new UsuarioDTO(2L, "Typhon", "02234-010", "Rua Vazia", "144", "", "Sao Paulo", "SP"))
 				.when().post("usuarios").asString();
 
 		Gson gson = new Gson();
 		UsuarioDTO dto = gson.fromJson(usuarioCreated, UsuarioDTO.class);
 
-//		when().delete("/usuarios/{id}", dto.getId()).then().statusCode(200);
-
 		Assertions.assertEquals("Typhon", dto.getNome());
-		Assertions.assertEquals("Rua Vazia", dto.getLogradouro());
+		Assertions.assertEquals("Rua Capitão Alcook", dto.getLogradouro());
 	}
 
 	@Test
@@ -96,14 +95,12 @@ class TesteEndToEndApplicationTests {
 				then().
 				statusCode(200).
 				body("nome", equalTo(dto.getNome()));
-
-//		when().delete("/usuarios/{id}", dto.getId()).then().statusCode(200);
 	}
 
 	@Test
 	public void givenUsuarioThenFindAllUsuarioAndDelete() {
 		String usuarioCreated = given().contentType("application/json")
-				.body(new UsuarioDTO(1L, "Dallas", "02458-000", "Av Prates", "740", "ap 104", "Sao Paulo", "SP"))
+				.body(new UsuarioDTO(2L, "Nemesis", "02234-010", "Rua Capitão Alcook", "53", "ap 12", "São Paulo", "SP"))
 				.when().post("usuarios").asString();
 
 		Gson gson = new Gson();
@@ -112,7 +109,39 @@ class TesteEndToEndApplicationTests {
 		when().get("/usuarios").
 				then().
 				statusCode(200).body("", hasSize(1));
+	}
 
-//		when().delete("/usuarios/{id}", dto.getId()).then().statusCode(200);
+	@Test
+	public void givenUsuarioSemNomeThenNomeDeveSerInformado() {
+		given().contentType("application/json")
+				.body(new UsuarioDTO(1L, "", "01234-010", "Praça Charles Miller", "255", "ap 12", "Sao Paulo", "SP"))
+				.when()
+					.post("usuarios")
+				.then()
+				.statusCode(400)
+				.body("erro", equalTo("Nome deve ser informado."));
+	}
+
+	@Test
+	public void givenCepSemValorThenCepDeveSerInformado() {
+		given().contentType("application/json")
+				.body(new UsuarioDTO(1L, "Rebeca", "", "Praça Charles Miller", "255", "ap 12", "Sao Paulo", "SP"))
+				.when()
+				.post("usuarios")
+				.then()
+				.statusCode(400)
+				.body("erro", equalTo("CEP deve conter 8 caracteres."));
+	}
+
+	@Test
+	public void givenUsuarioAndFindByInvalidIdThenReceiveErrorMessage() {
+		given().contentType("application/json")
+				.body(new UsuarioDTO(1L, "Phoenix", "01234-010", "Rua Nomade", "365", "ap 12", "Sao Paulo", "SP"))
+				.when().post("usuarios").asString();
+
+		when().get("/usuarios/{id}", -1).
+				then().
+				statusCode(400).
+				body(containsString("PathVariable id deve ser maior que zero"));
 	}
 }

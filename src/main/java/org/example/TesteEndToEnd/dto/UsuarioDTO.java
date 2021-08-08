@@ -5,12 +5,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.TesteEndToEnd.model.Usuario;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 public class UsuarioDTO {
     private Long id;
+    @NotEmpty(message = "Nome deve ser informado.")
     private String nome;
+    @NotEmpty
+    @Size(min = 8, message = "CEP deve conter 8 caracteres.")
     private String cep;
     private String logradouro;
     private String numero;

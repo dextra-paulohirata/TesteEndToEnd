@@ -7,7 +7,6 @@ import org.example.TesteEndToEnd.exception.CepNaoInformadoException;
 import org.example.TesteEndToEnd.exception.NomeNaoInformadoException;
 import org.example.TesteEndToEnd.model.Usuario;
 import org.example.TesteEndToEnd.repository.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -18,6 +17,7 @@ import java.util.Optional;
 
 @Service
 public class UsuarioService {
+    public static final String URL_BUSCA_CEP = "https://viacep.com.br/ws/%s/json/";
     private UsuarioRepository repository;
 
     private RestTemplate restTemplate;
@@ -42,15 +42,12 @@ public class UsuarioService {
     }
 
     public UsuarioDTO create(UsuarioDTO dto) throws NomeNaoInformadoException, CepNaoInformadoException, CepInvalidoException {
-        validateDTO(dto);
         getAddressFromViaCep(dto);
         Usuario usuarioCreated = repository.save(dto.toModel());
         return usuarioCreated.toDTO();
     }
 
     public UsuarioDTO update(long id, UsuarioDTO dto) throws NomeNaoInformadoException, CepNaoInformadoException, CepInvalidoException {
-        validateDTO(dto);
-
         Optional<Usuario> optionalUsuario = repository.findById(id);
         if (optionalUsuario.isPresent()) {
             if (!optionalUsuario.get().getCep().equalsIgnoreCase(dto.getCep())) {
@@ -84,12 +81,12 @@ public class UsuarioService {
 
     public boolean delete(long id) {
         Optional<Usuario> optionalUsuario = repository.findById(id);
-        if (optionalUsuario.isPresent()) {
-            repository.deleteById(id);
-            return true;
-        } else {
+
+        if (!optionalUsuario.isPresent()) {
             return false;
         }
+        repository.deleteById(id);
+        return true;
     }
 
     private void getAddressFromViaCep(UsuarioDTO dto) throws CepInvalidoException {
@@ -100,10 +97,10 @@ public class UsuarioService {
     }
 
     private AddressDTO searchZIP(String cep) throws CepInvalidoException {
-        String url = "https://viacep.com.br/ws/" + cep.replace("-", "").replace(" ", "");
-        url += "/json/";
+        String cepTratado = cep.replace("-", "").trim();
+        String url = String.format(URL_BUSCA_CEP, cepTratado);
         ResponseEntity<AddressDTO> addressDTO = restTemplate.getForEntity(url, AddressDTO.class);
-        if (addressDTO.getBody() == null || addressDTO.getBody().getCep() == null) {
+        if (addressDTO.getBody() == null || (addressDTO.getBody().getErro() != null && addressDTO.getBody().getErro()) || addressDTO.getBody().getCep() == null) {
             throw new CepInvalidoException();
         }
         return addressDTO.getBody();

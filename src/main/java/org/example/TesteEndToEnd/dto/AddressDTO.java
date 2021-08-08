@@ -20,4 +20,5 @@ public class AddressDTO {
     private String gia;
     private String ddd;
     private String siafi;
+    private Boolean erro;
 }

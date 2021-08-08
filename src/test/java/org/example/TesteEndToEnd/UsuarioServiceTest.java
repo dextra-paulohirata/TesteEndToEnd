@@ -105,7 +105,7 @@ public class UsuarioServiceTest {
     @Test
     public void whenCreateUsuario_ThenUsuarioShouldBeCreated() {
         usuario = new Usuario(1L, "Phoenix", "01234-010", "Praça Charles Miller", "255", "ap 12", "Sao Paulo", "SP");
-        AddressDTO addressDTO = new AddressDTO("01234-010", "Praça Charles Miller", "", "Pacaembu", "Sao Paulo", "SP", "3550308", "1004", "11", "7107");
+        AddressDTO addressDTO = new AddressDTO("01234-010", "Praça Charles Miller", "", "Pacaembu", "Sao Paulo", "SP", "3550308", "1004", "11", "7107", false);
         when(repository.save(usuario)).thenReturn(usuario);
 
         when(restTemplate.getForEntity("https://viacep.com.br/ws/01234010/json/", AddressDTO.class)).thenReturn(new ResponseEntity(addressDTO, HttpStatus.OK));

@@ -15,7 +15,7 @@ public class UsuarioDTO {
     private Long id;
     @NotEmpty(message = "Nome deve ser informado.")
     private String nome;
-    @NotEmpty
+    @NotEmpty(message = "CEP deve conter 8 caracteres.")
     @Size(min = 8, message = "CEP deve conter 8 caracteres.")
     private String cep;
     private String logradouro;

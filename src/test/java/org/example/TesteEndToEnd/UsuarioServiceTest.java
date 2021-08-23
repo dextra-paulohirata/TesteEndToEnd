@@ -80,27 +80,27 @@ public class UsuarioServiceTest {
         });
     }
 
-    @Test
-    public void whenUpdateUsuario_ThenThrowNomeNaoInformadoException() {
-        Assertions.assertThrows(NomeNaoInformadoException.class, () -> {
-            UsuarioDTO result = service.update(1L, new UsuarioDTO(1L, null, "01234-010", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
-        });
+//    @Test
+//    public void whenUpdateUsuario_ThenThrowNomeNaoInformadoException() {
+//        Assertions.assertThrows(NomeNaoInformadoException.class, () -> {
+//            UsuarioDTO result = service.update(1L, new UsuarioDTO(1L, null, "01234-010", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+//        });
+//
+//        Assertions.assertThrows(NomeNaoInformadoException.class, () -> {
+//            UsuarioDTO result = service.update(1L, new UsuarioDTO(1L, "", "01234-010", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+//        });
+//    }
 
-        Assertions.assertThrows(NomeNaoInformadoException.class, () -> {
-            UsuarioDTO result = service.update(1L, new UsuarioDTO(1L, "", "01234-010", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
-        });
-    }
-
-    @Test
-    public void whenUpdateUsuario_ThenThrowCepNaoInformadoException() {
-        Assertions.assertThrows(CepNaoInformadoException.class, () -> {
-            UsuarioDTO result = service.update(1L, new UsuarioDTO(1L, "Paulo", "", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
-        });
-
-        Assertions.assertThrows(CepNaoInformadoException.class, () -> {
-            UsuarioDTO result = service.update(1L, new UsuarioDTO(1L, "Paulo", null, "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
-        });
-    }
+//    @Test
+//    public void whenUpdateUsuario_ThenThrowCepNaoInformadoException() {
+//        Assertions.assertThrows(CepNaoInformadoException.class, () -> {
+//            UsuarioDTO result = service.update(1L, new UsuarioDTO(1L, "Paulo", "", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+//        });
+//
+//        Assertions.assertThrows(CepNaoInformadoException.class, () -> {
+//            UsuarioDTO result = service.update(1L, new UsuarioDTO(1L, "Paulo", null, "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+//        });
+//    }
 
     @Test
     public void whenCreateUsuario_ThenUsuarioShouldBeCreated() {
@@ -118,27 +118,27 @@ public class UsuarioServiceTest {
         });
     }
 
-    @Test
-    public void whenCreateUsuario_ThenThrowNomeNaoInformadoException() {
-        Assertions.assertThrows(NomeNaoInformadoException.class, () -> {
-            UsuarioDTO result = service.create(new UsuarioDTO(1L, null, "01234-010", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
-        });
+//    @Test
+//    public void whenCreateUsuario_ThenThrowNomeNaoInformadoException() {
+//        Assertions.assertThrows(NomeNaoInformadoException.class, () -> {
+//            UsuarioDTO result = service.create(new UsuarioDTO(1L, null, "01234-010", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+//        });
+//
+//        Assertions.assertThrows(NomeNaoInformadoException.class, () -> {
+//            UsuarioDTO result = service.create(new UsuarioDTO(1L, "", "01234-010", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+//        });
+//    }
 
-        Assertions.assertThrows(NomeNaoInformadoException.class, () -> {
-            UsuarioDTO result = service.create(new UsuarioDTO(1L, "", "01234-010", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
-        });
-    }
-
-    @Test
-    public void whenCreateUsuario_ThenThrowCepNaoInformadoException() {
-        Assertions.assertThrows(CepNaoInformadoException.class, () -> {
-            UsuarioDTO result = service.create(new UsuarioDTO(1L, "Snider", "", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
-        });
-
-        Assertions.assertThrows(CepNaoInformadoException.class, () -> {
-            UsuarioDTO result = service.create(new UsuarioDTO(1L, "Snider", null, "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
-        });
-    }
+//    @Test
+//    public void whenCreateUsuario_ThenThrowCepNaoInformadoException() {
+//        Assertions.assertThrows(CepNaoInformadoException.class, () -> {
+//            UsuarioDTO result = service.create(new UsuarioDTO(1L, "Snider", "", "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+//        });
+//
+//        Assertions.assertThrows(CepNaoInformadoException.class, () -> {
+//            UsuarioDTO result = service.create(new UsuarioDTO(1L, "Snider", null, "Rua Nomade", "255", "ap 12", "Sao Paulo", "SP"));
+//        });
+//    }
 
     @Test
     public void whenDeleteUsuario_ThenUsuarioShouldBeDeleted() {

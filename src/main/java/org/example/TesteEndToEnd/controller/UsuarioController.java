@@ -48,7 +48,6 @@ public class UsuarioController {
     }
 
     @PostMapping
-    // TODO: criar uma exception padrao para retornar no Rest
     public ResponseEntity<UsuarioDTO> create(@Valid @RequestBody UsuarioDTO usuarioDTO) throws NomeNaoInformadoException, CepNaoInformadoException, CepInvalidoException {
         return ResponseEntity.ok(service.create(usuarioDTO));
     }
